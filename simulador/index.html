@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ladrones de Banco</title>
+<style>
+  :root {
+    --page: #e7e9ee;
+    --bg: #f2f2f7;
+    --card: #ffffff;
+    --text: #000000;
+    --secondary: #6c6c70;
+    --tertiary: #c4c4c7;
+    --separator: #e3e3e8;
+    --accent: #1e9e5a;
+    --accent-soft: rgba(30, 158, 90, .14);
+    --red: #ff3b30;
+    --green: #34c759;
+    --orange: #ff9500;
+    --fill: rgba(118, 118, 128, .12);
+    --sheet-dim: rgba(0, 0, 0, .35);
+    --bezel: #1b1b1d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page: #101012; --bg: #000; --card: #1c1c1e; --text: #fff; --secondary: #98989f;
+      --tertiary: #48484a; --separator: #38383a; --accent: #30c27a; --accent-soft: rgba(48,194,122,.18);
+      --red: #ff453a; --green: #30d158; --orange: #ff9f0a; --fill: rgba(118,118,128,.24);
+      --sheet-dim: rgba(0,0,0,.6); --bezel: #2a2a2d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #101012; --bg: #000; --card: #1c1c1e; --text: #fff; --secondary: #98989f;
+    --tertiary: #48484a; --separator: #38383a; --accent: #30c27a; --accent-soft: rgba(48,194,122,.18);
+    --red: #ff453a; --green: #30d158; --orange: #ff9f0a; --fill: rgba(118,118,128,.24);
+    --sheet-dim: rgba(0,0,0,.6); --bezel: #2a2a2d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--page);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .barra-sim {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 16px; font-size: 13px; color: var(--secondary);
+  }
+  .barra-sim select, .barra-sim button {
+    font: inherit; color: var(--text); background: var(--card); border: 1px solid var(--separator);
+    border-radius: 8px; padding: 5px 10px; cursor: pointer;
+  }
+
+  /* ---------- iPhone ---------- */
+  .iphone {
+    width: 390px; max-width: 100%; height: 844px; max-height: calc(100vh - 90px); min-height: 640px;
+    border-radius: 54px; padding: 12px; background: var(--bezel);
+    box-shadow: 0 30px 60px rgba(0,0,0,.25), inset 0 0 0 2px #3a3a3c;
+    position: relative;
+  }
+  .pantalla {
+    width: 100%; height: 100%; border-radius: 42px; overflow: hidden;
+    background: var(--bg); position: relative;
+  }
+  .isla {
+    position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 34px; border-radius: 20px; background: #000; z-index: 50;
+  }
+  .estado {
+    position: absolute; top: 0; left: 0; right: 0; height: 54px; z-index: 40;
+    display: flex; justify-content: space-between; align-items: center; padding: 6px 32px 0 40px;
+    font-size: 16px; font-weight: 600; pointer-events: none;
+  }
+  .estado .iconos { display: flex; gap: 5px; align-items: center; }
+  .home-ind {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 134px; height: 5px; border-radius: 3px; background: var(--text); opacity: .85; z-index: 60;
+  }
+
+  /* ---------- navegación ---------- */
+  .vista {
+    position: absolute; inset: 0; background: var(--bg); overflow-y: auto; padding: 54px 0 34px;
+    transition: transform .35s cubic-bezier(.3,.9,.3,1);
+    scrollbar-width: none;
+  }
+  .vista::-webkit-scrollbar { display: none; }
+  .vista.fuera { transform: translateX(100%); }
+  .vista.atras { transform: translateX(-30%); }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; height: 44px; padding: 0 16px; }
+  .nav .titulo-inline { font-weight: 600; font-size: 17px; position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
+  .btn-nav { background: none; border: none; color: var(--accent); font-size: 17px; cursor: pointer; display: flex; align-items: center; gap: 2px; position: relative; z-index: 1; }
+  .btn-nav:disabled { color: var(--tertiary); cursor: default; }
+  .titulo-grande { font-size: 32px; font-weight: 700; letter-spacing: .3px; padding: 2px 16px 8px; }
+
+  .buscar {
+    margin: 0 16px 14px; background: var(--fill); border-radius: 10px; height: 36px;
+    display: flex; align-items: center; gap: 6px; padding: 0 8px; color: var(--secondary);
+  }
+  .buscar input { flex: 1; border: none; background: none; font: inherit; font-size: 17px; color: var(--text); outline: none; }
+
+  .resumen {
+    margin: 0 16px 22px; padding: 20px; border-radius: 20px; color: #fff;
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, transparent));
+  }
+  .resumen .etq { font-size: 15px; font-weight: 500; opacity: .85; }
+  .resumen .total { font-size: 40px; font-weight: 700; margin: 4px 0; font-variant-numeric: tabular-nums; }
+  .resumen .sub { font-size: 13px; opacity: .85; }
+
+  .seccion-titulo { font-size: 13px; color: var(--secondary); text-transform: uppercase; padding: 0 32px 7px; }
+  .seccion-pie { font-size: 13px; color: var(--secondary); padding: 7px 32px 0; }
+  .grupo { margin: 0 16px 24px; background: var(--card); border-radius: 12px; overflow: hidden; }
+  .fila {
+    display: flex; align-items: center; gap: 12px; padding: 10px 16px; min-height: 44px; position: relative;
+    background: var(--card); width: 100%; border: none; font: inherit; color: inherit; text-align: left;
+  }
+  .fila + .fila::before { content: ""; position: absolute; top: 0; right: 0; left: 16px; border-top: .5px solid var(--separator); }
+  .fila.con-avatar + .fila::before, .fila + .fila.con-avatar::before { left: 70px; }
+  button.fila { cursor: pointer; }
+  button.fila:active { background: var(--fill); }
+  .fila .grow { flex: 1; min-width: 0; }
+  .fila .nombre { font-weight: 600; font-size: 17px; display: flex; align-items: center; gap: 4px; }
+  .fila .meta { font-size: 12px; color: var(--secondary); margin-top: 1px; }
+  .chev { color: var(--tertiary); font-size: 14px; font-weight: 700; }
+
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+    background: var(--accent-soft); color: var(--accent);
+    display: grid; place-items: center; font-weight: 600; font-size: 16px;
+  }
+  .avatar.grande { width: 64px; height: 64px; font-size: 24px; }
+
+  .saldo-rojo { color: var(--red); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .chip-verde { background: color-mix(in srgb, var(--green) 16%, transparent); color: var(--green); font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 999px; }
+  .a-favor { color: var(--secondary); font-size: 12px; font-weight: 600; }
+
+  .vacio { text-align: center; padding: 60px 40px; color: var(--secondary); }
+  .vacio .icono { font-size: 44px; margin-bottom: 10px; }
+  .vacio h3 { color: var(--text); font-size: 20px; margin-bottom: 6px; }
+
+  /* detalle */
+  .cabecera { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 20px 16px; }
+  .cabecera .etq { font-size: 15px; color: var(--secondary); }
+  .cabecera .monto { font-size: 36px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .botones { display: flex; gap: 12px; width: 100%; }
+  .boton {
+    flex: 1; border: none; border-radius: 12px; height: 50px; font: inherit; font-size: 17px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .boton.sec { background: var(--accent-soft); color: var(--accent); }
+  .boton.pri { background: var(--accent); color: #fff; }
+  .boton:active { opacity: .7; }
+  .ico-mov { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 15px; flex-shrink: 0; }
+  .fila.deshabilitada { opacity: .4; pointer-events: none; }
+  .borrar { background: none; border: none; color: var(--red); font-size: 13px; cursor: pointer; padding: 4px; opacity: 0; transition: opacity .15s; }
+  .fila:hover .borrar { opacity: 1; }
+
+  /* hojas (sheets) */
+  .velo { position: absolute; inset: 0; background: var(--sheet-dim); opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 70; }
+  .velo.visible { opacity: 1; pointer-events: auto; }
+  .hoja {
+    position: absolute; left: 0; right: 0; bottom: 0; top: 54px; z-index: 80;
+    background: var(--bg); border-radius: 12px 12px 0 0; transform: translateY(105%);
+    transition: transform .4s cubic-bezier(.3,.9,.3,1); overflow-y: auto; padding-bottom: 34px;
+  }
+  .hoja.visible { transform: translateY(0); }
+  .hoja .nav { position: sticky; top: 0; background: var(--bg); z-index: 2; height: 56px; }
+  .campo { border: none; background: none; font: inherit; font-size: 17px; color: var(--text); outline: none; width: 100%; }
+  .campo.grande { font-size: 22px; font-weight: 600; }
+  .campo::placeholder { color: var(--tertiary); }
+  input[type="date"].campo, input[type="datetime-local"].campo { text-align: right; color: var(--accent); width: auto; color-scheme: light dark; }
+  .enlace { background: none; border: none; color: var(--accent); font: inherit; font-size: 17px; cursor: pointer; text-align: left; }
+  .enlace.peligro { color: var(--red); width: 100%; text-align: center; }
+  .atajos { display: flex; gap: 8px; margin: 0 16px 24px; }
+  .atajos button { flex: 1; border: none; border-radius: 10px; padding: 9px 0; background: var(--accent-soft); color: var(--accent); font: inherit; font-size: 15px; font-weight: 500; cursor: pointer; }
+
+  /* notificación */
+  .banner {
+    position: absolute; top: 10px; left: 8px; right: 8px; z-index: 100;
+    background: color-mix(in srgb, var(--card) 88%, transparent); backdrop-filter: blur(20px);
+    border-radius: 22px; padding: 12px 14px; display: flex; gap: 10px; align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2); transform: translateY(-140%); transition: transform .45s cubic-bezier(.3,1.3,.4,1);
+    cursor: pointer;
+  }
+  .banner.visible { transform: translateY(0); }
+  .banner .app-ico { width: 38px; height: 38px; border-radius: 9px; background: var(--accent); display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+  .banner .t { font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; }
+  .banner .t small { font-weight: 400; color: var(--secondary); font-size: 13px; }
+  .banner .b { font-size: 15px; }
+
+  .alerta-velo { position: absolute; inset: 0; z-index: 110; background: rgba(0,0,0,.3); display: none; place-items: center; }
+  .alerta-velo.visible { display: grid; }
+  .alerta { width: 270px; background: color-mix(in srgb, var(--card) 94%, transparent); backdrop-filter: blur(20px); border-radius: 14px; text-align: center; overflow: hidden; }
+  .alerta .cuerpo { padding: 18px 16px; }
+  .alerta h4 { font-size: 17px; margin-bottom: 4px; }
+  .alerta p { font-size: 13px; }
+  .alerta .acciones { display: flex; border-top: .5px solid var(--separator); }
+  .alerta .acciones button { flex: 1; background: none; border: none; padding: 11px; font: inherit; font-size: 17px; color: var(--accent); cursor: pointer; }
+  .alerta .acciones button + button { border-left: .5px solid var(--separator); font-weight: 600; }
+
+  @media (max-width: 420px) {
+    body { padding: 8px 0 0; }
+    .iphone { border-radius: 0; padding: 0; height: calc(100vh - 60px); max-height: none; box-shadow: none; background: none; }
+    .pantalla { border-radius: 0; }
+    .isla, .home-ind { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="barra-sim">
+  <span>Simulador · iPhone 15</span>
+  <select id="moneda" aria-label="Moneda">
+    <option value="USD">USD $</option>
+    <option value="EUR">EUR €</option>
+    <option value="MXN">MXN $</option>
+    <option value="PEN">PEN S/</option>
+    <option value="COP">COP $</option>
+    <option value="ARS">ARS $</option>
+    <option value="CLP">CLP $</option>
+  </select>
+  <button id="tema">Tema</button>
+  <button id="reiniciar">Datos de ejemplo</button>
+</div>
+
+<div class="iphone">
+  <div class="pantalla" id="pantalla">
+    <div class="isla"></div>
+    <div class="estado"><span id="hora">9:41</span><span class="iconos">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="19" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="1.5" height="4" rx=".75" fill="currentColor" opacity=".4"/></svg>
+    </span></div>
+
+    <section class="vista" id="vista-lista"></section>
+    <section class="vista fuera" id="vista-detalle"></section>
+
+    <div class="velo" id="velo"></div>
+    <div class="hoja" id="hoja"></div>
+
+    <div class="banner" id="banner">
+      <div class="app-ico">💰</div>
+      <div class="grow"><div class="t">¡Hora de cobrar! <small>ahora</small></div><div class="b" id="banner-texto"></div></div>
+    </div>
+
+    <div class="alerta-velo" id="alerta-velo">
+      <div class="alerta">
+        <div class="cuerpo"><h4 id="alerta-titulo"></h4><p id="alerta-texto"></p></div>
+        <div class="acciones"><button id="alerta-cancelar">Cancelar</button><button id="alerta-ok">Borrar</button></div>
+      </div>
+    </div>
+
+    <div class="home-ind"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- Estado (equivalente a SwiftData) ----------
+  const CLAVE = "ladrones-de-banco-v1";
+  const dia = 86400000;
+  const uid = () => Math.random().toString(36).slice(2, 10);
+
+  function datosDeEjemplo() {
+    const ahora = Date.now();
+    const p = (nombre, movs, recordatorio = null) => ({
+      uid: uid(), nombre, telefono: "", creadaEn: ahora, recordatorio,
+      movimientos: movs.map(([monto, tipo, dias, nota]) => ({ id: uid(), monto, tipo, fecha: ahora + dias * dia, nota }))
+    });
+    return [
+      p("Carlos Pérez", [[150, "prestamo", -20, "Cena del viernes"], [50, "pago", -5, ""]], ahora + 2 * dia),
+      p("Lucía Gómez", [[80, "prestamo", -3, "Entradas del concierto"]]),
+      p("Martín Ruiz", [[200, "prestamo", -40, "Alquiler"], [200, "pago", -10, ""]]),
+    ];
+  }
+
+  let personas;
+  try { personas = JSON.parse(localStorage.getItem(CLAVE)) || datosDeEjemplo(); }
+  catch { personas = datosDeEjemplo(); }
+  const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(personas)); } catch {} };
+
+  let moneda = "USD";
+  try { moneda = localStorage.getItem(CLAVE + "-moneda") || "USD"; } catch {}
+
+  const saldo = p => p.movimientos.reduce((t, m) => m.tipo === "prestamo" ? t + m.monto : t - m.monto, 0);
+  const ultimo = p => p.movimientos.length ? Math.max(...p.movimientos.map(m => m.fecha)) : null;
+  const iniciales = n => n.split(" ").filter(Boolean).slice(0, 2).map(s => s[0]).join("").toUpperCase();
+  const recordatorioActivo = p => p.recordatorio && p.recordatorio > Date.now();
+  const fmt = v => new Intl.NumberFormat("es", { style: "currency", currency: moneda }).format(v);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const relativo = t => {
+    const d = Math.round((t - Date.now()) / dia);
+    return new Intl.RelativeTimeFormat("es", { numeric: "auto" }).format(d, "day");
+  };
+  const fechaCorta = t => new Date(t).toLocaleDateString("es", { day: "numeric", month: "short", year: "numeric" });
+  const fechaLarga = t => new Date(t).toLocaleString("es", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+  const aInputFecha = (t, conHora) => {
+    const d = new Date(t - new Date(t).getTimezoneOffset() * 60000).toISOString();
+    return conHora ? d.slice(0, 16) : d.slice(0, 10);
+  };
+  const parseMonto = s => { const v = parseFloat(String(s).trim().replace(",", ".")); return v > 0 ? Math.round(v * 100) / 100 : null; };
+
+  // Recordatorios: igual que Recordatorios.actualizar en Swift.
+  function actualizarRecordatorio(p) {
+    if (p.recordatorio && (saldo(p) <= 0 || p.recordatorio <= Date.now())) p.recordatorio = null;
+  }
+
+  // ---------- Render ----------
+  const $ = id => document.getElementById(id);
+  let busqueda = "";
+  let actualUid = null;
+
+  function etiquetaSaldo(s) {
+    if (s > 0) return `<span class="saldo-rojo">${fmt(s)}</span>`;
+    if (s === 0) return `<span class="chip-verde">Al día</span>`;
+    return `<span class="a-favor">A favor ${fmt(-s)}</span>`;
+  }
+
+  function renderLista() {
+    const deudores = personas.filter(p => saldo(p) > 0);
+    const total = deudores.reduce((t, p) => t + saldo(p), 0);
+    const filtradas = personas
+      .filter(p => p.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+      .sort((a, b) => saldo(b) - saldo(a) || a.nombre.localeCompare(b.nombre));
+
+    const filas = filtradas.map(p => `
+      <button class="fila con-avatar" data-abrir="${p.uid}">
+        <div class="avatar">${esc(iniciales(p.nombre))}</div>
+        <div class="grow">
+          <div class="nombre">${esc(p.nombre)} ${recordatorioActivo(p) ? '<span style="color:var(--orange);font-size:11px">🔔</span>' : ""}</div>
+          <div class="meta">${ultimo(p) ? "Último movimiento " + relativo(ultimo(p)) : "Sin movimientos"}</div>
+        </div>
+        ${etiquetaSaldo(saldo(p))}
+        <span class="chev">›</span>
+      </button>`).join("");
+
+    $("vista-lista").innerHTML = `
+      <div class="nav"><span></span><button class="btn-nav" id="btn-nueva" aria-label="Agregar persona">
+        <svg width="26" height="22" viewBox="0 0 26 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="7" r="4.5"/><path d="M2 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/><path d="M21 5v8M17 9h8"/></svg>
+      </button></div>
+      <h1 class="titulo-grande">Ladrones de Banco</h1>
+      <label class="buscar">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5" stroke-linecap="round"/></svg>
+        <input id="buscar" placeholder="Buscar persona" value="${esc(busqueda)}">
+      </label>
+      <div class="resumen">
+        <div class="etq">Te deben en total</div>
+        <div class="total">${fmt(total)}</div>
+        <div class="sub">${deudores.length === 1 ? "1 persona con deuda pendiente" : deudores.length + " personas con deuda pendiente"}</div>
+      </div>
+      ${personas.length ? `<div class="seccion-titulo">Ladrones</div><div class="grupo">${filas || '<div class="fila"><span class="meta">Sin resultados</span></div>'}</div>`
+        : `<div class="vacio"><div class="icono">💵</div><h3>Nadie te debe… aún</h3><p>Toca el botón de arriba para agregar a tu primer ladrón.</p></div>`}
+    `;
+    $("btn-nueva").onclick = abrirNuevaPersona;
+    const input = $("buscar");
+    input.oninput = e => { busqueda = e.target.value; const pos = e.target.selectionStart; renderLista(); const i = $("buscar"); i.focus(); i.setSelectionRange(pos, pos); };
+    document.querySelectorAll("[data-abrir]").forEach(b => b.onclick = () => abrirDetalle(b.dataset.abrir));
+  }
+
+  function renderDetalle() {
+    const p = personas.find(x => x.uid === actualUid);
+    if (!p) return;
+    const s = saldo(p);
+    const titulo = s > 0 ? "Te debe" : s === 0 ? "Está al día 🎉" : "Te pagó de más";
+    const movs = [...p.movimientos].sort((a, b) => b.fecha - a.fecha);
+
+    $("vista-detalle").innerHTML = `
+      <div class="nav">
+        <button class="btn-nav" id="btn-atras"><svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg>&nbsp;Atrás</button>
+        <span class="titulo-inline">${esc(p.nombre)}</span>
+        <button class="btn-nav" id="btn-borrar-persona" style="color:var(--red);font-size:15px">Borrar</button>
+      </div>
+      <div class="grupo"><div class="cabecera">
+        <div class="avatar grande">${esc(iniciales(p.nombre))}</div>
+        <div style="text-align:center"><div class="etq">${titulo}</div>
+          <div class="monto" style="color:${s > 0 ? "var(--red)" : "var(--text)"}">${fmt(Math.abs(s))}</div></div>
+        <div class="botones">
+          <button class="boton sec" data-mov="prestamo">↗ Le presté</button>
+          <button class="boton pri" data-mov="pago">↙ Me pagó</button>
+        </div>
+      </div></div>
+
+      <div class="seccion-titulo">Recordatorio</div>
+      <div class="grupo">
+        <button class="fila ${s <= 0 ? "deshabilitada" : ""}" id="btn-recordatorio">
+          <span style="color:var(--orange)">${recordatorioActivo(p) ? "🔔" : "🔕"}</span>
+          <span class="grow">${recordatorioActivo(p) ? fechaLarga(p.recordatorio) : "Programar recordatorio de cobro"}</span>
+          <span class="chev">›</span>
+        </button>
+      </div>
+
+      <div class="seccion-titulo">Historial</div>
+      <div class="grupo">
+        ${movs.length ? movs.map(m => `
+          <div class="fila">
+            <div class="ico-mov" style="background:${m.tipo === "prestamo" ? "var(--red)" : "var(--green)"}">${m.tipo === "prestamo" ? "↗" : "↙"}</div>
+            <div class="grow"><div>${esc(m.nota || (m.tipo === "prestamo" ? "Le presté" : "Me pagó"))}</div><div class="meta">${fechaCorta(m.fecha)}</div></div>
+            <button class="borrar" data-borrar="${m.id}" aria-label="Borrar movimiento">Borrar</button>
+            <span style="color:${m.tipo === "prestamo" ? "var(--red)" : "var(--green)"};font-variant-numeric:tabular-nums">${m.tipo === "prestamo" ? "+" : "−"}${fmt(m.monto)}</span>
+          </div>`).join("") : '<div class="fila"><span class="meta" style="font-size:15px">Todavía no hay movimientos.</span></div>'}
+      </div>
+      ${movs.length ? '<div class="seccion-pie" style="margin-top:-18px">En iPhone: desliza a la izquierda para borrar.</div>' : ""}
+    `;
+    $("btn-atras").onclick = cerrarDetalle;
+    $("btn-borrar-persona").onclick = () => confirmar(`¿Borrar a ${p.nombre}?`, "Se borrará todo su historial.", () => {
+      personas = personas.filter(x => x.uid !== p.uid); guardar(); cerrarDetalle();
+    });
+    document.querySelectorAll("[data-mov]").forEach(b => b.onclick = () => abrirMovimiento(p, b.dataset.mov));
+    $("btn-recordatorio").onclick = () => abrirRecordatorio(p);
+    document.querySelectorAll("[data-borrar]").forEach(b => b.onclick = () => {
+      p.movimientos = p.movimientos.filter(m => m.id !== b.dataset.borrar);
+      actualizarRecordatorio(p); guardar(); render();
+    });
+  }
+
+  function render() { renderLista(); if (actualUid) renderDetalle(); }
+
+  function abrirDetalle(id) {
+    actualUid = id; renderDetalle();
+    $("vista-detalle").scrollTop = 0;
+    $("vista-detalle").classList.remove("fuera");
+    $("vista-lista").classList.add("atras");
+  }
+  function cerrarDetalle() {
+    $("vista-detalle").classList.add("fuera");
+    $("vista-lista").classList.remove("atras");
+    actualUid = null; renderLista();
+  }
+
+  // ---------- Hojas ----------
+  function abrirHoja(html, alMontar) {
+    $("hoja").innerHTML = html;
+    $("hoja").scrollTop = 0;
+    $("velo").classList.add("visible");
+    $("hoja").classList.add("visible");
+    alMontar();
+    const primero = $("hoja").querySelector("input.campo:not([type=date]):not([type=datetime-local])");
+    if (primero) setTimeout(() => primero.focus(), 350);
+  }
+  function cerrarHoja() { $("velo").classList.remove("visible"); $("hoja").classList.remove("visible"); }
+  $("velo").onclick = cerrarHoja;
+
+  const navHoja = (titulo, textoOk = "Guardar") => `
+    <div class="nav"><button class="btn-nav" data-cancelar>Cancelar</button>
+    <span class="titulo-inline">${titulo}</span>
+    <button class="btn-nav" data-ok style="font-weight:600">${textoOk}</button></div>`;
+
+  function abrirNuevaPersona() {
+    abrirHoja(`
+      ${navHoja("Nuevo ladrón")}
+      <div class="seccion-titulo" style="margin-top:12px">¿Quién es?</div>
+      <div class="grupo">
+        <div class="fila"><input class="campo" id="f-nombre" placeholder="Nombre" autocomplete="off"></div>
+        <div class="fila"><input class="campo" id="f-tel" placeholder="Teléfono (opcional)" inputmode="tel"></div>
+      </div>
+      <div class="seccion-titulo">¿Ya te debe algo?</div>
+      <div class="grupo" style="margin-bottom:0">
+        <div class="fila"><input class="campo" id="f-monto" placeholder="Monto" inputmode="decimal"></div>
+        <div class="fila"><input class="campo" id="f-nota" placeholder="¿Para qué? (opcional)"></div>
+      </div>
+      <div class="seccion-pie">Puedes dejarlo vacío y registrar préstamos después.</div>
+    `, () => {
+      const ok = $("hoja").querySelector("[data-ok]");
+      const validar = () => ok.disabled = !$("f-nombre").value.trim();
+      validar();
+      $("f-nombre").oninput = validar;
+      $("hoja").querySelector("[data-cancelar]").onclick = cerrarHoja;
+      ok.onclick = () => {
+        const p = { uid: uid(), nombre: $("f-nombre").value.trim(), telefono: $("f-tel").value, creadaEn: Date.now(), recordatorio: null, movimientos: [] };
+        const monto = parseMonto($("f-monto").value);
+        if (monto) p.movimientos.push({ id: uid(), monto, tipo: "prestamo", fecha: Date.now(), nota: $("f-nota").value.trim() });
+        personas.push(p); guardar(); cerrarHoja(); render();
+      };
+    });
+  }
+
+  function abrirMovimiento(p, tipo) {
+    const s = saldo(p);
+    abrirHoja(`
+      ${navHoja(tipo === "prestamo" ? `Le presté a ${esc(p.nombre)}` : `${esc(p.nombre)} me pagó`)}
+      <div class="grupo" style="margin-top:12px;margin-bottom:0">
+        <div class="fila"><input class="campo grande" id="f-monto" placeholder="Monto" inputmode="decimal"></div>
+        ${tipo === "pago" && s > 0 ? `<div class="fila"><button class="enlace" id="f-todo">Pagó todo (${fmt(s)})</button></div>` : ""}
+      </div>
+      <div class="seccion-pie" id="f-aviso"></div>
+      <div class="grupo" style="margin-top:20px">
+        <div class="fila"><span class="grow">Fecha</span><input class="campo" type="date" id="f-fecha" value="${aInputFecha(Date.now())}" max="${aInputFecha(Date.now())}"></div>
+        <div class="fila"><input class="campo" id="f-nota" placeholder="Nota (opcional)"></div>
+      </div>
+    `, () => {
+      const ok = $("hoja").querySelector("[data-ok]");
+      const validar = () => {
+        const m = parseMonto($("f-monto").value);
+        ok.disabled = !m;
+        $("f-aviso").textContent = tipo === "pago" && m && s > 0 && m > s ? `Es más de lo que debe. Quedará ${fmt(m - s)} a su favor.` : "";
+      };
+      validar();
+      $("f-monto").oninput = validar;
+      if ($("f-todo")) $("f-todo").onclick = () => { $("f-monto").value = String(s); validar(); };
+      $("hoja").querySelector("[data-cancelar]").onclick = cerrarHoja;
+      ok.onclick = () => {
+        const [a, mes, d] = $("f-fecha").value.split("-").map(Number);
+        const hoy = new Date();
+        const fecha = $("f-fecha").value ? new Date(a, mes - 1, d, hoy.getHours(), hoy.getMinutes()).getTime() : Date.now();
+        p.movimientos.push({ id: uid(), monto: parseMonto($("f-monto").value), tipo, fecha, nota: $("f-nota").value.trim() });
+        actualizarRecordatorio(p); guardar(); cerrarHoja(); render();
+      };
+    });
+  }
+
+  function abrirRecordatorio(p) {
+    const manana10 = () => { const d = new Date(Date.now() + dia); d.setHours(10, 0, 0, 0); return d.getTime(); };
+    abrirHoja(`
+      ${navHoja("Recordatorio")}
+      <div class="atajos" style="margin-top:12px">
+        <button data-dias="1">Mañana</button><button data-dias="3">En 3 días</button><button data-dias="7">En 1 semana</button>
+      </div>
+      <div class="grupo" style="margin-bottom:0">
+        <div class="fila"><span class="grow">Recordarme</span><input class="campo" type="datetime-local" id="f-cuando"
+          value="${aInputFecha(recordatorioActivo(p) ? p.recordatorio : manana10(), true)}" min="${aInputFecha(Date.now(), true)}"></div>
+      </div>
+      <div class="seccion-pie">Recibirás: “${esc(p.nombre)} te debe ${fmt(saldo(p))}.”</div>
+      <div class="seccion-titulo" style="margin-top:24px">Solo en el simulador</div>
+      <div class="grupo">
+        <div class="fila"><button class="enlace" id="f-prueba">Probar: avisar en 5 segundos</button></div>
+      </div>
+      ${recordatorioActivo(p) ? `<div class="grupo"><div class="fila"><button class="enlace peligro" id="f-quitar">Quitar recordatorio</button></div></div>` : ""}
+    `, () => {
+      document.querySelectorAll("[data-dias]").forEach(b => b.onclick = () => {
+        const d = new Date(Date.now() + Number(b.dataset.dias) * dia); d.setHours(10, 0, 0, 0);
+        $("f-cuando").value = aInputFecha(d.getTime(), true);
+      });
+      $("hoja").querySelector("[data-cancelar]").onclick = cerrarHoja;
+      $("hoja").querySelector("[data-ok]").onclick = () => {
+        const t = new Date($("f-cuando").value).getTime();
+        if (!t || t <= Date.now()) return;
+        p.recordatorio = t; guardar(); cerrarHoja(); render();
+      };
+      $("f-prueba").onclick = () => {
+        p.recordatorio = Date.now() + 5000; guardar(); cerrarHoja(); render();
+      };
+      if ($("f-quitar")) $("f-quitar").onclick = () => { p.recordatorio = null; guardar(); cerrarHoja(); render(); };
+    });
+  }
+
+  // ---------- Alertas y notificaciones ----------
+  function confirmar(titulo, texto, alAceptar) {
+    $("alerta-titulo").textContent = titulo; $("alerta-texto").textContent = texto;
+    $("alerta-velo").classList.add("visible");
+    $("alerta-cancelar").onclick = () => $("alerta-velo").classList.remove("visible");
+    $("alerta-ok").onclick = () => { $("alerta-velo").classList.remove("visible"); alAceptar(); };
+  }
+
+  let ocultarBanner;
+  function notificar(p) {
+    $("banner-texto").textContent = `${p.nombre} te debe ${fmt(saldo(p))}.`;
+    $("banner").classList.add("visible");
+    $("banner").onclick = () => { $("banner").classList.remove("visible"); cerrarHoja(); abrirDetalle(p.uid); };
+    clearTimeout(ocultarBanner);
+    ocultarBanner = setTimeout(() => $("banner").classList.remove("visible"), 5000);
+  }
+
+  // Revisa recordatorios vencidos, como haría iOS con UNCalendarNotificationTrigger.
+  setInterval(() => {
+    let cambio = false;
+    for (const p of personas) {
+      if (p.recordatorio && p.recordatorio <= Date.now()) {
+        if (saldo(p) > 0) notificar(p);
+        p.recordatorio = null; cambio = true;
+      }
+    }
+    if (cambio) { guardar(); render(); }
+    const h = new Date(); $("hora").textContent = `${h.getHours()}:${String(h.getMinutes()).padStart(2, "0")}`;
+  }, 1000);
+
+  // ---------- Controles del simulador ----------
+  $("moneda").value = moneda;
+  $("moneda").onchange = e => { moneda = e.target.value; try { localStorage.setItem(CLAVE + "-moneda", moneda); } catch {} render(); };
+  $("reiniciar").onclick = () => { personas = datosDeEjemplo(); guardar(); cerrarHoja(); if (actualUid) cerrarDetalle(); render(); };
+  $("tema").onclick = () => {
+    const raiz = document.documentElement;
+    const oscuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    raiz.dataset.theme = oscuro ? "light" : "dark";
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>

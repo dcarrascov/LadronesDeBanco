@@ -1,0 +1,41 @@
+# Compila la app en una Mac de GitHub y genera un .ipa sin firmar.
+# AltStore (o Sideloadly) lo firma con tu Apple ID al instalarlo.
+name: Compilar IPA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Versión de Xcode
+        run: xcodebuild -version
+
+      - name: Compilar
+        run: |
+          xcodebuild build \
+            -project LadronesDeBanco.xcodeproj \
+            -target LadronesDeBanco \
+            -configuration Release \
+            -sdk iphoneos \
+            SYMROOT="$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Empaquetar .ipa
+        run: |
+          mkdir -p build/Payload
+          cp -R build/Release-iphoneos/LadronesDeBanco.app build/Payload/
+          cd build && zip -qry LadronesDeBanco.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LadronesDeBanco-ipa
+          path: build/LadronesDeBanco.ipa
+          retention-days: 30
