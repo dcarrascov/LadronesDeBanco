@@ -3,7 +3,22 @@
 Necesitas: tu PC con Windows, tu iPhone (iOS 17 o superior), un cable USB y un Apple ID.
 Recomendado: un Apple ID secundario, creado solo para esto.
 
-## 1. Conseguir el .ipa (lo hace quien tenga la Mac)
+## 1. Conseguir el .ipa
+
+Hay dos formas. Las dos dan el mismo archivo `LadronesDeBanco.ipa`.
+
+### Opción A: GitHub (sin Mac)
+
+Cada vez que se sube un cambio a `main`, una Mac de GitHub compila la app (unos 5 minutos).
+
+1. En GitHub, abre el repositorio → pestaña **Actions** → **Compilar IPA**.
+2. Entra en la última ejecución con ✅ verde.
+3. Abajo, en **Artifacts**, descarga `LadronesDeBanco-ipa` (es un .zip) y descomprímelo: dentro está `LadronesDeBanco.ipa`.
+
+Desde la terminal también se puede: `gh run download --name LadronesDeBanco-ipa`.
+Para compilar sin subir cambios: Actions → Compilar IPA → **Run workflow**.
+
+### Opción B: la Mac de un colega
 
 Requisitos en la Mac: macOS 14.5 o superior y **Xcode 16 o superior** (gratis en la App Store).
 No hace falta ninguna cuenta de Apple en la Mac: el .ipa sale sin firmar y AltStore lo firma con tu Apple ID.
