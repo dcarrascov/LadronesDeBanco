@@ -10,6 +10,7 @@ struct NuevaPersonaView: View {
     @State private var telefono = ""
     @State private var montoTexto = ""
     @State private var nota = ""
+    @State private var fecha = Date.now
     @State private var foto: Data?
 
     private var nombreLimpio: String { nombre.trimmingCharacters(in: .whitespaces) }
@@ -37,6 +38,7 @@ struct NuevaPersonaView: View {
                     TextField("Monto", text: $montoTexto)
                         .keyboardType(.decimalPad)
                     TextField("¿Para qué? (opcional)", text: $nota)
+                    DatePicker("Fecha", selection: $fecha, in: ...Date.now, displayedComponents: .date)
                 } header: {
                     Text("¿Ya te debe algo?")
                 } footer: {
@@ -62,7 +64,7 @@ struct NuevaPersonaView: View {
         persona.foto = foto
         context.insert(persona)
         if let monto = Decimal(texto: montoTexto), monto > 0 {
-            let movimiento = Movimiento(monto: monto, tipo: .prestamo, nota: nota)
+            let movimiento = Movimiento(monto: monto, tipo: .prestamo, fecha: fecha, nota: nota)
             context.insert(movimiento)
             movimiento.persona = persona
         }

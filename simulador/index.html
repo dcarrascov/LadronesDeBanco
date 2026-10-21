@@ -85,7 +85,7 @@
 
   /* ---------- navegación ---------- */
   .vista {
-    position: absolute; inset: 0; background: var(--bg); overflow-y: auto; padding: 54px 0 34px;
+    position: absolute; inset: 0; background: var(--bg); overflow-y: auto; padding: 0 0 34px;
     transition: transform .35s cubic-bezier(.3,.9,.3,1);
     scrollbar-width: none;
   }
@@ -93,7 +93,17 @@
   .vista.fuera { transform: translateX(100%); }
   .vista.atras { transform: translateX(-30%); }
 
-  .nav { display: flex; justify-content: space-between; align-items: center; height: 44px; padding: 0 16px; }
+  .nav { display: flex; justify-content: space-between; align-items: center; height: 44px; padding: 0 16px; position: relative; }
+  /* Barra de navegación fija bajo la barra de estado, como la de iOS al hacer scroll. */
+  .cabecera-nav {
+    position: sticky; top: 0; z-index: 5; padding-top: 54px;
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: .5px solid transparent; transition: border-color .2s;
+  }
+  .vista.desplazada .cabecera-nav { border-bottom-color: var(--separator); }
+  .titulo-inline.al-bajar { opacity: 0; transition: opacity .2s; }
+  .vista.desplazada .titulo-inline.al-bajar { opacity: 1; }
   .nav .titulo-inline { font-weight: 600; font-size: 17px; position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
   .btn-nav { background: none; border: none; color: var(--accent); font-size: 17px; cursor: pointer; display: flex; align-items: center; gap: 2px; position: relative; z-index: 1; }
   .btn-nav:disabled { color: var(--tertiary); cursor: default; }
@@ -335,6 +345,13 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAAEECAYAAAAMHVmn
     const d = new Date(t - new Date(t).getTimezoneOffset() * 60000).toISOString();
     return conHora ? d.slice(0, 16) : d.slice(0, 10);
   };
+  // Día elegido en un <input type="date"> con la hora actual; hoy si está vacío.
+  const leerFecha = valor => {
+    if (!valor) return Date.now();
+    const [a, mes, d] = valor.split("-").map(Number);
+    const ahora = new Date();
+    return new Date(a, mes - 1, d, ahora.getHours(), ahora.getMinutes()).getTime();
+  };
   const parseMonto = s => { const v = parseFloat(String(s).trim().replace(",", ".")); return v > 0 ? Math.round(v * 100) / 100 : null; };
 
   // Recordatorios: igual que Recordatorios.actualizar en Swift.
@@ -409,11 +426,11 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAAEECAYAAAAMHVmn
       </button>`).join("");
 
     $("vista-lista").innerHTML = `
-      <div class="nav"><button class="btn-nav" id="btn-ajustes" aria-label="Ajustes">
+      <div class="cabecera-nav"><div class="nav"><span class="titulo-inline al-bajar">Ladrones de Banco</span><button class="btn-nav" id="btn-ajustes" aria-label="Ajustes">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button><button class="btn-nav" id="btn-nueva" aria-label="Agregar persona">
         <svg width="26" height="22" viewBox="0 0 26 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="7" r="4.5"/><path d="M2 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/><path d="M21 5v8M17 9h8"/></svg>
-      </button></div>
+      </button></div></div>
       <h1 class="titulo-grande">Ladrones de Banco</h1>
       <label class="buscar">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5" stroke-linecap="round"/></svg>
@@ -445,11 +462,11 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAAEECAYAAAAMHVmn
     const movs = [...p.movimientos].sort((a, b) => b.fecha - a.fecha);
 
     $("vista-detalle").innerHTML = `
-      <div class="nav">
+      <div class="cabecera-nav"><div class="nav">
         <button class="btn-nav" id="btn-atras"><svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg>&nbsp;Atrás</button>
         <span class="titulo-inline">${esc(p.nombre)}</span>
         <button class="btn-nav" id="btn-borrar-persona" style="color:var(--red);font-size:15px">Borrar</button>
-      </div>
+      </div></div>
       <div class="grupo"><div class="cabecera">
         ${selectorFoto(p, "grande", "f-foto")}
         <div style="text-align:center"><div class="etq">${titulo}</div>
@@ -539,6 +556,7 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAAEECAYAAAAMHVmn
       <div class="grupo" style="margin-bottom:0">
         <div class="fila"><input class="campo" id="f-monto" placeholder="Monto" inputmode="decimal"></div>
         <div class="fila"><input class="campo" id="f-nota" placeholder="¿Para qué? (opcional)"></div>
+        <div class="fila"><span class="grow">Fecha</span><input class="campo" type="date" id="f-fecha" value="${aInputFecha(Date.now())}" max="${aInputFecha(Date.now())}"></div>
       </div>
       <div class="seccion-pie">Puedes dejarlo vacío y registrar préstamos después.</div>
     `, () => {
@@ -560,7 +578,7 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAAEECAYAAAAMHVmn
       ok.onclick = () => {
         const p = { uid: uid(), nombre: $("f-nombre").value.trim(), telefono: $("f-tel").value, foto: borrador.foto, creadaEn: Date.now(), recordatorio: null, movimientos: [] };
         const monto = parseMonto($("f-monto").value);
-        if (monto) p.movimientos.push({ id: uid(), monto, tipo: "prestamo", fecha: Date.now(), nota: $("f-nota").value.trim() });
+        if (monto) p.movimientos.push({ id: uid(), monto, tipo: "prestamo", fecha: leerFecha($("f-fecha").value), nota: $("f-nota").value.trim() });
         personas.push(p); guardar(); cerrarHoja(); render();
       };
     });
@@ -591,9 +609,7 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAAEECAYAAAAMHVmn
       if ($("f-todo")) $("f-todo").onclick = () => { $("f-monto").value = String(s); validar(); };
       $("hoja").querySelector("[data-cancelar]").onclick = cerrarHoja;
       ok.onclick = () => {
-        const [a, mes, d] = $("f-fecha").value.split("-").map(Number);
-        const hoy = new Date();
-        const fecha = $("f-fecha").value ? new Date(a, mes - 1, d, hoy.getHours(), hoy.getMinutes()).getTime() : Date.now();
+        const fecha = leerFecha($("f-fecha").value);
         p.movimientos.push({ id: uid(), monto: parseMonto($("f-monto").value), tipo, fecha, nota: $("f-nota").value.trim() });
         actualizarRecordatorio(p); guardar(); cerrarHoja(); render();
       };
@@ -720,6 +736,9 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAAEECAYAAAAMHVmn
       $("hoja").querySelector("[data-ok]").onclick = cerrarHoja;
     });
   }
+
+  document.querySelectorAll(".vista").forEach(v =>
+    v.addEventListener("scroll", () => v.classList.toggle("desplazada", v.scrollTop > 40)));
 
   // ---------- Controles del simulador ----------
   $("reiniciar").onclick = () => { personas = datosDeEjemplo(); guardar(); cerrarHoja(); if (actualUid) cerrarDetalle(); render(); };
