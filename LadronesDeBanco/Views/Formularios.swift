@@ -10,12 +10,23 @@ struct NuevaPersonaView: View {
     @State private var telefono = ""
     @State private var montoTexto = ""
     @State private var nota = ""
+    @State private var foto: Data?
 
     private var nombreLimpio: String { nombre.trimmingCharacters(in: .whitespaces) }
+
+    private var iniciales: String {
+        nombreLimpio.split(separator: " ").prefix(2).compactMap(\.first).map(String.init).joined().uppercased()
+    }
 
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    SelectorFotoView(foto: $foto, iniciales: iniciales)
+                        .frame(maxWidth: .infinity)
+                }
+                .listRowBackground(Color.clear)
+
                 Section("¿Quién es?") {
                     TextField("Nombre", text: $nombre)
                         .textContentType(.name)
@@ -48,6 +59,7 @@ struct NuevaPersonaView: View {
 
     private func guardar() {
         let persona = Persona(nombre: nombreLimpio, telefono: telefono)
+        persona.foto = foto
         context.insert(persona)
         if let monto = Decimal(texto: montoTexto), monto > 0 {
             let movimiento = Movimiento(monto: monto, tipo: .prestamo, nota: nota)

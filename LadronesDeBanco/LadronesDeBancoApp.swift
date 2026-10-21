@@ -5,10 +5,12 @@ import UserNotifications
 @main
 struct LadronesDeBancoApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @AppStorage(Ajustes.claveTema) private var tema: Tema = .sistema
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(tema.esquema)
         }
         .modelContainer(for: [Persona.self, Movimiento.self])
     }

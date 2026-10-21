@@ -8,6 +8,8 @@ final class Persona {
     var nombre: String
     var telefono: String
     var creadaEn: Date
+    /// Foto de perfil ya recortada y comprimida (ver `Fotos.preparar`).
+    @Attribute(.externalStorage) var foto: Data?
     /// Fecha del recordatorio de cobro pendiente, si hay uno.
     var recordatorio: Date?
 
@@ -88,7 +90,7 @@ final class Movimiento {
 
 extension Decimal {
     var moneda: String {
-        formatted(.currency(code: Locale.current.currency?.identifier ?? "USD"))
+        formatted(.currency(code: Ajustes.codigoMoneda))
     }
 
     /// Acepta "12,50" o "12.50".

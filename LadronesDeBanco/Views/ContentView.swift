@@ -6,7 +6,11 @@ struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Persona.nombre) private var personas: [Persona]
 
+    /// Se observa para redibujar los montos al cambiar de moneda.
+    @AppStorage(Ajustes.claveMoneda) private var moneda = ""
+
     @State private var mostrandoNuevaPersona = false
+    @State private var mostrandoAjustes = false
     @State private var busqueda = ""
 
     private var personasFiltradas: [Persona] {
@@ -43,12 +47,20 @@ struct ContentView: View {
                     }
                 }
             }
+            .id(moneda)
             .navigationTitle("Ladrones de Banco")
             .navigationDestination(for: Persona.self) { persona in
                 DetallePersonaView(persona: persona)
             }
             .searchable(text: $busqueda, prompt: "Buscar persona")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        mostrandoAjustes = true
+                    } label: {
+                        Label("Ajustes", systemImage: "gearshape")
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         mostrandoNuevaPersona = true
@@ -60,13 +72,23 @@ struct ContentView: View {
             .sheet(isPresented: $mostrandoNuevaPersona) {
                 NuevaPersonaView()
             }
+            .sheet(isPresented: $mostrandoAjustes) {
+                AjustesView()
+            }
             .overlay {
                 if personas.isEmpty {
-                    ContentUnavailableView(
-                        "Nadie te debe… aún",
-                        systemImage: "banknote",
-                        description: Text("Toca \(Image(systemName: "person.badge.plus")) para agregar a tu primer ladrón.")
-                    )
+                    ContentUnavailableView {
+                        Label {
+                            Text("Nadie te debe… aún")
+                        } icon: {
+                            Image("Logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 120)
+                        }
+                    } description: {
+                        Text("Toca \(Image(systemName: "person.badge.plus")) para agregar a tu primer ladrón.")
+                    }
                     .padding(.top, 160)
                 }
             }
@@ -87,19 +109,30 @@ private struct ResumenView: View {
     let cantidadDeudores: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Te deben en total")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.white.opacity(0.85))
-            Text(total.moneda)
-                .font(.system(size: 40, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .contentTransition(.numericText())
-            Text(cantidadDeudores == 1 ? "1 persona con deuda pendiente" : "\(cantidadDeudores) personas con deuda pendiente")
-                .font(.footnote)
-                .foregroundStyle(.white.opacity(0.85))
+        HStack(alignment: .bottom, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Te deben en total")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.white.opacity(0.85))
+                Text(total.moneda)
+                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .contentTransition(.numericText())
+                Text(cantidadDeudores == 1 ? "1 persona con deuda pendiente" : "\(cantidadDeudores) personas con deuda pendiente")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.85))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Image("Logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 84)
+                .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
+                .padding(.bottom, -6)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
         .background(
             LinearGradient(
@@ -117,7 +150,7 @@ struct FilaPersonaView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            AvatarView(iniciales: persona.iniciales)
+            AvatarView(iniciales: persona.iniciales, foto: persona.foto)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
@@ -147,19 +180,6 @@ struct FilaPersonaView: View {
     }
 }
 
-struct AvatarView: View {
-    let iniciales: String
-    var tamano: CGFloat = 42
-
-    var body: some View {
-        Text(iniciales)
-            .font(.system(size: tamano * 0.38, weight: .semibold, design: .rounded))
-            .foregroundStyle(Color.accentColor)
-            .frame(width: tamano, height: tamano)
-            .background(Color.accentColor.opacity(0.15), in: Circle())
-    }
-}
-
 struct SaldoEtiqueta: View {
     let saldo: Decimal
 
@@ -173,7 +193,7 @@ struct SaldoEtiqueta: View {
                 .font(.caption.weight(.semibold))
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(.green.opacity(0.15), in: Capsule())
+                .background(Color.green.opacity(0.15), in: Capsule())
                 .foregroundStyle(.green)
         } else {
             Text("A favor \((-saldo).moneda)")

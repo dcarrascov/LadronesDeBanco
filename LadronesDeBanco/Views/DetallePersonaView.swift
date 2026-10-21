@@ -17,14 +17,14 @@ struct DetallePersonaView: View {
         List {
             Section {
                 VStack(spacing: 14) {
-                    AvatarView(iniciales: persona.iniciales, tamano: 64)
+                    SelectorFotoView(foto: $persona.foto, iniciales: persona.iniciales, tamano: 80)
                     VStack(spacing: 2) {
                         Text(tituloSaldo)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         Text(abs(persona.saldo).moneda)
                             .font(.system(size: 36, weight: .bold, design: .rounded))
-                            .foregroundStyle(persona.saldo > 0 ? .red : .primary)
+                            .foregroundStyle(persona.saldo > 0 ? Color.red : Color.primary)
                             .contentTransition(.numericText())
                     }
                     HStack(spacing: 12) {
@@ -120,7 +120,7 @@ private struct FilaMovimientoView: View {
         HStack(spacing: 12) {
             Image(systemName: movimiento.tipo.icono)
                 .font(.title2)
-                .foregroundStyle(movimiento.tipo == .prestamo ? .red : .green)
+                .foregroundStyle(movimiento.tipo == .prestamo ? Color.red : Color.green)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(movimiento.nota.isEmpty ? movimiento.tipo.titulo : movimiento.nota)
@@ -134,7 +134,7 @@ private struct FilaMovimientoView: View {
 
             Text((movimiento.tipo == .prestamo ? "+" : "−") + movimiento.monto.moneda)
                 .font(.body.monospacedDigit())
-                .foregroundStyle(movimiento.tipo == .prestamo ? .red : .green)
+                .foregroundStyle(movimiento.tipo == .prestamo ? Color.red : Color.green)
         }
     }
 }
