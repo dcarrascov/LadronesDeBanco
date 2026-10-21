@@ -18,6 +18,8 @@ jobs:
 
       - name: Compilar
         run: |
+          set -o pipefail
+          mkdir -p build
           xcodebuild build \
             -project LadronesDeBanco.xcodeproj \
             -target LadronesDeBanco \
@@ -26,7 +28,22 @@ jobs:
             SYMROOT="$PWD/build" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
+            CODE_SIGN_IDENTITY="" 2>&1 | tee build/compilacion.log
+
+      # Si Xcode no compila el código Swift, la app sale sin ejecutable y aun así
+      # "compila bien". Aquí se comprueba para que falle en rojo en lugar de dar un .ipa vacío.
+      - name: Verificar que el código Swift se compiló
+        run: |
+          APP=build/Release-iphoneos/LadronesDeBanco.app
+          if [ ! -f "$APP/LadronesDeBanco" ]; then
+            echo "::error::Falta el ejecutable en $APP: el código Swift no se compiló."
+            ls -la "$APP" || true
+            exit 1
+          fi
+          echo "Ejecutable: $(du -h "$APP/LadronesDeBanco" | cut -f1)"
+          file "$APP/LadronesDeBanco"
+          echo "Archivos Swift compilados:"
+          grep -oE '[A-Za-z]+\.swift' build/compilacion.log | sort -u
 
       - name: Empaquetar .ipa
         run: |
@@ -38,4 +55,11 @@ jobs:
         with:
           name: LadronesDeBanco-ipa
           path: build/LadronesDeBanco.ipa
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compilacion-log
+          path: build/compilacion.log
           retention-days: 30

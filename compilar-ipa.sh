@@ -32,6 +32,13 @@ if ! xcodebuild build \
   exit 1
 fi
 
+# Sin ejecutable la app no abre aunque xcodebuild diga que todo fue bien.
+if [ ! -f build/Release-iphoneos/LadronesDeBanco.app/LadronesDeBanco ]; then
+  echo "❌ La app se generó sin ejecutable: el código Swift no se compiló."
+  echo "Envía el archivo build/compilacion.log para corregirlo."
+  exit 1
+fi
+
 mkdir -p build/Payload
 cp -R build/Release-iphoneos/LadronesDeBanco.app build/Payload/
 (cd build && zip -qry ../LadronesDeBanco.ipa Payload)
