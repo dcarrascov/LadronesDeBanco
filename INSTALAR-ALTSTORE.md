@@ -42,11 +42,20 @@ Si falla, el script muestra los errores y guarda todo en `build/compilacion.log`
 
 1. Instala **iTunes** e **iCloud** descargados desde la web de Apple
    (no las versiones de la Microsoft Store; AltServer no funciona con esas).
-2. Descarga **AltServer para Windows** desde https://altstore.io e instálalo.
-   Quedará como un ícono con forma de rombo junto al reloj de Windows.
+   - La web de Apple ya solo ofrece iCloud en la Microsoft Store. Usa el enlace directo de la guía de AltStore:
+     https://updates.cdn-apple.com/2020/windows/001-39935-20200911-1A70AA56-F448-11EA-8CC0-99D41950005E/iCloudSetup.exe
+   - **No hace falta iniciar sesión en iCloud.** Esa versión antigua da el error 80046 al entrar; no importa.
+2. Descarga **AltServer para Windows** desde https://altstore.io e instálalo. Tiene que ser la **1.8.1 o posterior**:
+   la 1.8.0 falla al iniciar sesión con Apple (errores -80045 / -80046).
+   - AltServer **no tiene ventana**: es un ícono con forma de rombo junto al reloj (flecha **^**).
+   - Ábrelo **una sola vez** y **como administrador** (clic derecho → Ejecutar como administrador).
+   - Si una actualización pide reiniciar Windows, reinicia antes de usarlo.
+   - Deja **iTunes abierto** mientras usas AltServer.
 3. Conecta el iPhone por cable, pulsa **Confiar** en el iPhone.
 4. En iTunes, selecciona el iPhone y marca **"Sincronizar con este iPhone vía Wi-Fi"** → Aplicar.
-   Esto permite que AltServer renueve la app sin cable.
+   Esto permite que AltServer renueve la app sin cable. Para que funcione, Windows tiene que tener tu Wi-Fi
+   como **red privada** (Configuración → Red e Internet → Wi-Fi → propiedades → Red privada).
+   Por cable funciona todo aunque la red sea pública.
 
 ## 3. Instalar AltStore en el iPhone (una sola vez)
 
