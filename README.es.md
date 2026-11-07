@@ -99,6 +99,29 @@ Con un Apple ID gratuito la app dura **7 días**. AltStore la renueva por Wi-Fi 
 
 La guía paso a paso completa está en [INSTALAR-ALTSTORE.md](INSTALAR-ALTSTORE.md).
 
+## Cómo contribuir
+
+Las contribuciones son bienvenidas: avisos de errores, ideas y *pull requests*.
+
+**Avisar de un error o proponer una idea.** Abre un [issue](../../issues) contando qué pasó, o qué te gustaría que hiciera la app. Si es un error, indica tu versión de iOS y los pasos para reproducirlo.
+
+**Enviar un cambio:**
+
+1. Haz un *fork* del repositorio y crea una rama desde `main`, por ejemplo `feature/recordatorio-whatsapp` o `fix/fecha-recordatorio`.
+2. Haz tu cambio siguiendo el estilo del código:
+   - El código y sus nombres están en español (`Persona`, `saldo`, `Recordatorios`…). Mantenlo así.
+   - Los textos de la interfaz están en español.
+   - Usa solo SwiftUI y SwiftData, sin dependencias de terceros.
+3. Si cambias una pantalla, actualiza también [`simulador/index.html`](simulador/index.html), para que la réplica web siga igual que la app.
+4. Sube tu rama. El workflow **Compilar IPA** de GitHub Actions se ejecuta en tu *fork* y tiene que terminar en verde, lo que demuestra que el código Swift compila.
+5. Abre un *pull request* hacia `main`. Explica qué cambia y por qué, y añade una captura si cambia la interfaz.
+
+**Mensajes de commit:** un título corto en inglés, en imperativo y sin descripción. Por ejemplo, `Add WhatsApp reminder button`.
+
+Algunas ideas pendientes: enviar el recordatorio por WhatsApp, registrar lo que *tú* debes, fecha límite por deuda, hacer la foto con la cámara, y estadísticas o exportar a Excel.
+
+Al contribuir, aceptas que tu código se publique bajo la [licencia MIT](LICENSE) del proyecto.
+
 ## Notas
 
 - Proyecto personal, no publicado en la App Store. Publicarla requeriría una cuenta de pago de Apple Developer.

@@ -101,6 +101,29 @@ With a free Apple ID the app lasts **7 days**. AltStore refreshes it over Wi-Fi 
 
 There's a detailed step-by-step guide, in Spanish, in [INSTALAR-ALTSTORE.md](INSTALAR-ALTSTORE.md).
 
+## Contributing
+
+Contributions are welcome: bug reports, ideas and pull requests.
+
+**Report a bug or suggest an idea.** Open an [issue](../../issues) describing what happened, or what you'd like the app to do. For bugs, include your iOS version and the steps to reproduce it.
+
+**Send a change:**
+
+1. Fork the repository and create a branch from `main`, for example `feature/whatsapp-reminder` or `fix/reminder-date`.
+2. Make your change, following the existing code style:
+   - The code and its identifiers are in Spanish (`Persona`, `saldo`, `Recordatorios`…). Keep it that way.
+   - The interface text is in Spanish.
+   - Use SwiftUI and SwiftData only, with no third-party dependencies.
+3. If you change a screen, update [`simulador/index.html`](simulador/index.html) too, so the web replica keeps matching the app.
+4. Push your branch. The **Compilar IPA** GitHub Actions workflow runs on your fork and must finish green, which proves the Swift code compiles.
+5. Open a pull request against `main`. Explain what it changes and why, and add a screenshot if the interface changes.
+
+**Commit messages:** a short title in English, in the imperative, with no body. For example, `Add WhatsApp reminder button`.
+
+Some ideas not done yet: sending the reminder through WhatsApp, recording what *you* owe, due dates per debt, taking a photo with the camera, and statistics or exporting to Excel.
+
+By contributing, you agree that your code is released under the project's [MIT License](LICENSE).
+
 ## Notes
 
 - Personal project, not published on the App Store. Publishing it would require a paid Apple Developer account.
