@@ -102,4 +102,9 @@ La guía paso a paso completa está en [INSTALAR-ALTSTORE.md](INSTALAR-ALTSTORE.
 ## Notas
 
 - Proyecto personal, no publicado en la App Store. Publicarla requeriría una cuenta de pago de Apple Developer.
-- El dibujo del mapache es solo para uso personal. Para publicar la app haría falta una ilustración con licencia o propia.
+
+## Licencia
+
+El código fuente se publica bajo la [licencia MIT](LICENSE).
+
+El dibujo del mapache es de terceros y **no está incluido** en esa licencia. Eso abarca el ícono, el logo (`AppIcon.appiconset/icono.png`, `Logo.imageset/logo.png`) y la copia incrustada en el simulador. Aquí se usa solo con fines personales. Si reutilizas o publicas la app, sustitúyelo por una ilustración propia.

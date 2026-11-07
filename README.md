@@ -104,4 +104,9 @@ There's a detailed step-by-step guide, in Spanish, in [INSTALAR-ALTSTORE.md](INS
 ## Notes
 
 - Personal project, not published on the App Store. Publishing it would require a paid Apple Developer account.
-- The raccoon artwork is for personal use only. A licensed or original illustration would be needed to publish the app.
+
+## License
+
+The source code is released under the [MIT License](LICENSE).
+
+The raccoon artwork is third-party and **is not covered** by that license. That includes the app icon, the logo (`AppIcon.appiconset/icono.png`, `Logo.imageset/logo.png`) and the copy embedded in the simulator. It's used here for personal purposes only. Replace it with your own artwork if you reuse or publish the app.
